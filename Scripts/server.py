@@ -1,7 +1,7 @@
 import time
 import threading
 import platform
-
+# okay...
 debug = (platform.platform()[0:7]=="Windows")
 if debug:
     from cv2_debugscreen import TestScreen
