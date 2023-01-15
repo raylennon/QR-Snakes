@@ -1,7 +1,5 @@
 import time
 import threading
-import sys
-
 import platform
 
 debug = (platform.platform()[0:7]=="Windows")
@@ -11,29 +9,19 @@ else:
     from rgbmatrix import RGBMatrix, RGBMatrixOptions
 
 from PIL import Image
-
 import flask
 from flask import Flask, render_template, Response, request, redirect, url_for
 
 import createqrcode
-import graphics
+import numpy as np
 
-import os
-
-current_level = "Demo Scene"
-
-# load all of the images into memory for speed purposes?
-
-bg = Image.open('../Assets/Levels/' + current_level + '/background.png')
-player = Image.open('../Assets/Misc/Player.png')
-sublevel = Image.open('../Assets/Levels/' + current_level + '/Sublevel.png')
-overlay = Image.open('../Assets/Misc/Exclamation-Overlay.png')
-
-# decrease the number of method arguments later...
-images = [bg, player, sublevel, overlay]
+import sys
 
 global position
-position = [int(bg.width/2), int(bg.height/2)]
+
+position = [16, 8]
+curdir='left'
+bits = np.array([position]*10)
 
 global matrix
 
@@ -46,7 +34,7 @@ if not debug:
     options.chain_length = 1
     options.parallel = 1
     options.gpio_slowdown = 2
-    options.brightness=20
+    options.brightness=60
     options.hardware_mapping = 'adafruit-hat'
     options.daemon = False
     options.drop_privileges = False
@@ -61,7 +49,7 @@ app = flask.Flask(__name__,
                 static_folder='../Web Interface/static',
                 template_folder='../Web Interface/templates')
 
-validmoves = ['left','right','up','down','lu','ru','ld','rd']
+validmoves = ['left','right','up','down']
 
 global started
 started = False
@@ -71,56 +59,50 @@ def root():
     global started
     if not started:
         pass
-        #graphics.displaycutscene('intro', matrix)
     started = True
     return flask.render_template("index.html")
 
 @app.route('/<cmd>')
 def command(cmd=None):
-    global matrix
-    global position
-    global started
-
-    global mostrecent
-
+    global curdir
     response = cmd.lower()
+    if (response in ['left', 'right', 'up', 'down']):
+        curdir = cmd.lower()
 
-    if response == 'esc':
-        started = False
-        position = [int(bg.width/2), int(bg.height/2)]
-        matrix.Clear()
-        matrix.SetImage(createqrcode.make())
-        return "esc", 200, {'Content-Type': 'text/plain'}
-    else:
-        pass
-        # mostrecent.cancel()
-        # mostrecent = threading.Timer(45.0, command, ['esc'])
-        # mostrecent.start()
-    
-    if response == 'center':
-        pass
-    
-    elif response in validmoves:
-        print("gasp")
-        newpos = graphics.checkvalidmove(response, position, sublevel)
-        if newpos:
-            position = newpos[:]
-    
-    matrix.Clear()
-    matrix.SetImage(graphics.frame(position,response, images))
+    return response
 
-    return response, 200, {'Content-Type': 'text/plain'}
+def update():
+    global bits
+    while True:
+        time.sleep(0.2)
+        bits[:-1,:] = bits[1:,:]
+        if curdir=='left': tform = np.array([-1,0])
+        elif curdir=='right': tform = np.array([1,0])
+        elif curdir=='up': tform = np.array([0,-1])
+        elif curdir=='down': tform = np.array([0,1])
 
-# mostrecent = threading.Timer(45.0, command, ['esc'])
+        bits[-1,:] = bits[-2,:]+tform
+
+        bits[:,0] = np.mod(bits[:,0],32*np.ones(len(bits)))
+        bits[:,1] = np.mod(bits[:,1],16*np.ones(len(bits)))
+
+        frame = np.zeros((32, 16))
+        frame[bits[:,0],bits[:,1]]+=150
+        matrix.SetImage(frame.T)
+    return
+
+gameloop = threading.Thread(target=update)
+gameloop.start()
+
 matrix.SetImage(createqrcode.make())
-print("okay...")
-
 
 if __name__ == "__main__":
+
     t = threading.Thread(target=app.run, kwargs={"host":"0.0.0.0", 'port':80, 'debug':True, 'threaded':True, 'use_reloader':False})
     t.start()
-    # app.run(host="0.0.0.0", port=8000, debug=True, threaded=True, use_reloader=False)
+
+
+    # t.terminate()
+    # t.join()
 
 matrix.check()
-
-t.join()
