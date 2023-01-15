@@ -19,7 +19,7 @@ import sys
 
 global position
 
-position = [16, 8]
+position = [32, 16]
 curdir='left'
 bits = np.array([position]*10)
 
@@ -74,7 +74,7 @@ def command(cmd=None):
 def update():
     global bits
     while True:
-        time.sleep(0.2)
+        time.sleep(0.1)
         bits[:-1,:] = bits[1:,:]
         if curdir=='left': tform = np.array([-1,0])
         elif curdir=='right': tform = np.array([1,0])
@@ -83,10 +83,10 @@ def update():
 
         bits[-1,:] = bits[-2,:]+tform
 
-        bits[:,0] = np.mod(bits[:,0],32*np.ones(len(bits)))
-        bits[:,1] = np.mod(bits[:,1],16*np.ones(len(bits)))
+        bits[:,0] = np.mod(bits[:,0],64*np.ones(len(bits)))
+        bits[:,1] = np.mod(bits[:,1],32*np.ones(len(bits)))
 
-        frame = np.zeros((32, 16))
+        frame = np.zeros((64, 32))
         frame[bits[:,0],bits[:,1]]+=150
         matrix.SetImage(Image.fromarray(frame.T).convert('RGB'))
     return
