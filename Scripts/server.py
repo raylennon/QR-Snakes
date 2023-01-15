@@ -88,7 +88,7 @@ def update():
 
         frame = np.zeros((32, 16))
         frame[bits[:,0],bits[:,1]]+=150
-        matrix.SetImage(Image.fromarray(frame.T))
+        matrix.SetImage(Image.fromarray(frame.T).convert('RGB'))
     return
 
 gameloop = threading.Thread(target=update)
