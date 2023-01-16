@@ -56,72 +56,88 @@ validmoves = ['left','right','up','down']
 global apple
 apple = np.random.randint([0, 0],[63, 31], (2))
 
-global started
-started = False
+splash = True
 
 @app.route("/")
 def root():
-    global started
-    if not started:
-        pass
-    started = True
+    global splash
+    splash = False
     return flask.render_template("index.html")
 
 @app.route('/<cmd>')
 def command(cmd=None):
+    global mostrecent
     global curdir
     r = cmd.lower()
     if (r in ['left', 'right', 'up', 'down']):
         if (r in ['left', 'right'] and curdir in ['up', 'down']) or  \
            (r in ['up', 'down'] and curdir in ['left', 'right']):
             curdir = cmd.lower()
+    mostrecent.cancel()
+    mostrecent = threading.Timer(5, command, ['esc'])
+    mostrecent.start()
+    if r == 'esc':
+        global bits
+        global splash
+        splash = True
+        curdir='left'
+        bits = np.array([[32, 16], [33, 16]])
+        grow = False
+        matrix.SetImage(createqrcode.make())
     return r
+
+def getspl():
+    global splash
+    return splash
+
+
 def update():
     global curdir
     global apple
     global bits
     global grow
     while True:
-
+        spl = getspl()
         time.sleep(0.1)
+        if not splash:
 
-        if curdir=='left': tform = np.array([-1,0])
-        elif curdir=='right': tform = np.array([1,0])
-        elif curdir=='up': tform = np.array([0,-1])
-        elif curdir=='down': tform = np.array([0,1])
-        if not grow:
-            bits[:-1,:] = bits[1:,:]
-            bits[-1,:] = bits[-2,:]+tform
-        else:
-            newbits = np.empty((bits.shape[0]+1, bits.shape[1]))
-            newbits[:-1,:] = bits
-            newbits[-1,:] = bits[-1,:]+tform
-            print(newbits)
-            bits = newbits.astype(int)
-            grow = False
+            if curdir=='left': tform = np.array([-1,0])
+            elif curdir=='right': tform = np.array([1,0])
+            elif curdir=='up': tform = np.array([0,-1])
+            elif curdir=='down': tform = np.array([0,1])
+            if not grow:
+                bits[:-1,:] = bits[1:,:]
+                bits[-1,:] = bits[-2,:]+tform
+            else:
+                newbits = np.empty((bits.shape[0]+1, bits.shape[1]))
+                newbits[:-1,:] = bits
+                newbits[-1,:] = bits[-1,:]+tform
+                print(newbits)
+                bits = newbits.astype(int)
+                grow = False
 
-        if not len(np.unique(bits, axis=0)) == len(bits):
-            curdir='left'
-            bits = np.array([[32, 16], [33, 16]])            
+            if not len(np.unique(bits, axis=0)) == len(bits):
+                curdir='left'
+                bits = np.array([[32, 16], [33, 16]])            
 
-        bits[:,0] = np.mod(bits[:,0],64*np.ones(len(bits))) # periodic boundary
-        bits[:,1] = np.mod(bits[:,1],32*np.ones(len(bits)))
+            bits[:,0] = np.mod(bits[:,0],64*np.ones(len(bits))) # periodic boundary
+            bits[:,1] = np.mod(bits[:,1],32*np.ones(len(bits)))
 
-        if np.array_equal(bits[-1,:],apple):
-            apple = np.random.randint([0, 0],[63, 31], (2))
-            grow = True
+            if np.array_equal(bits[-1,:],apple):
+                apple = np.random.randint([0, 0],[63, 31], (2))
+                grow = True
 
-        frame = np.zeros((64, 32))
-        frame[bits[:,0],bits[:,1]]+=150 # draws the snake
-        frame[apple[0],apple[1]]+=200
+            frame = np.zeros((64, 32))
+            frame[bits[:,0],bits[:,1]]+=150 # draws the snake
+            frame[apple[0],apple[1]]+=200
 
-        matrix.SetImage(Image.fromarray(frame.T).convert('RGB'))
-
-
+            matrix.SetImage(Image.fromarray(frame.T).convert('RGB'))
     return
 
 gameloop = threading.Thread(target=update)
 gameloop.start()
+
+mostrecent = threading.Timer(5, command, ['esc'])
 
 matrix.SetImage(createqrcode.make())
 
