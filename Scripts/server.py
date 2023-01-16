@@ -75,6 +75,7 @@ def command(cmd=None):
         if (r in ['left', 'right'] and curdir in ['up', 'down']) or  \
            (r in ['up', 'down'] and curdir in ['left', 'right']):
             curdir = cmd.lower()
+    return r
 def update():
     global curdir
     global apple
