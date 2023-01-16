@@ -68,6 +68,7 @@ def root():
 def command(cmd=None):
     global mostrecent
     global curdir
+    global bits
     r = cmd.lower()
     if (r in ['left', 'right', 'up', 'down']):
         if (r in ['left', 'right'] and (not bits[-1,1]==bits[-2,1])) or  \
@@ -77,7 +78,6 @@ def command(cmd=None):
     mostrecent = threading.Timer(5, command, ['esc'])
     mostrecent.start()
     if r == 'esc':
-        global bits
         global splash
         splash = True
         curdir='left'
