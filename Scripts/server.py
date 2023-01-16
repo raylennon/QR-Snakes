@@ -75,7 +75,7 @@ def command(cmd=None):
            (r in ['up', 'down'] and (not bits[-1,0]==bits[-2,0])):
             curdir = cmd.lower()
     mostrecent.cancel()
-    mostrecent = threading.Timer(5, command, ['esc'])
+    mostrecent = threading.Timer(30, command, ['esc'])
     mostrecent.start()
     if r == 'esc':
         global splash
@@ -137,7 +137,7 @@ def update():
 gameloop = threading.Thread(target=update)
 gameloop.start()
 
-mostrecent = threading.Timer(5, command, ['esc'])
+mostrecent = threading.Timer(30, command, ['esc'])
 
 matrix.SetImage(createqrcode.make())
 
