@@ -29,7 +29,7 @@ if not debug:
     options.chain_length = 1
     options.parallel = 1
     options.gpio_slowdown = 2
-    options.brightness=60
+    options.brightness=15
     options.hardware_mapping = 'adafruit-hat'
     options.daemon = False
     options.drop_privileges = False
@@ -70,8 +70,8 @@ def command(cmd=None):
     global curdir
     r = cmd.lower()
     if (r in ['left', 'right', 'up', 'down']):
-        if (r in ['left', 'right'] and curdir in ['up', 'down']) or  \
-           (r in ['up', 'down'] and curdir in ['left', 'right']):
+        if (r in ['left', 'right'] and (not bits[-1,1]==bits[-2,1])) or  \
+           (r in ['up', 'down'] and (not bits[-1,0]==bits[-2,0])):
             curdir = cmd.lower()
     mostrecent.cancel()
     mostrecent = threading.Timer(5, command, ['esc'])
