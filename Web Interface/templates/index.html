@@ -156,7 +156,7 @@
             var request = new XMLHttpRequest();
             if (!centertimeout) {
                 centertimeout = setInterval(function () {
-                    request.open("GET", "/ESC", true);
+                    request.open("GET", "/kill", true);
                     request.send();
                 }, delay);
             }
