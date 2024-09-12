@@ -128,8 +128,8 @@ def update():
                 grow = True
 
             frame = np.zeros((64, 32,3)).astype(np.uint8)
-            frame[bits[:,0],bits[:,1], :]+=150 # draws the snake
-            frame[apple[0],apple[1], :]+=200
+            frame[bits[:,0],bits[:,1], 1:-1]+=150 # draws the snake
+            frame[apple[0],apple[1], 0]+=200
 
             matrix.SetImage(Image.fromarray(np.transpose(frame, axes=[1,0,2])).convert('RGB'))
     return
