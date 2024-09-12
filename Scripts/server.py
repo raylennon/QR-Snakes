@@ -127,7 +127,7 @@ def update():
                 apple = np.random.randint([0, 0],[63, 31], (2))
                 grow = True
 
-            frame = np.zeros((64, 32,3))
+            frame = np.zeros((64, 32,3)).astype(np.uint8)
             frame[bits[:,0],bits[:,1], :]+=150 # draws the snake
             frame[apple[0],apple[1], :]+=200
 
