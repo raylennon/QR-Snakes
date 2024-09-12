@@ -131,7 +131,7 @@ def update():
             frame[bits[:,0],bits[:,1], :]+=150 # draws the snake
             frame[apple[0],apple[1], :]+=200
 
-            matrix.SetImage(Image.fromarray(frame.T).convert('RGB'))
+            matrix.SetImage(Image.fromarray(np.transpose(frame, axes=[1,0,2])).convert('RGB'))
     return
 
 gameloop = threading.Thread(target=update)
