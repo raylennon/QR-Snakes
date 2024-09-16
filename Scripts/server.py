@@ -24,7 +24,7 @@ global mostrecent
 
 if not debug:
     options = RGBMatrixOptions()
-    options.rows = 128
+    options.rows = 64
     options.cols = 64
     options.chain_length = 2
     options.parallel = 1
