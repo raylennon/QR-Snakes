@@ -24,9 +24,9 @@ global mostrecent
 
 if not debug:
     options = RGBMatrixOptions()
-    options.rows = 32
+    options.rows = 64
     options.cols = 64
-    options.chain_length = 1
+    options.chain_length = 2
     options.parallel = 1
     options.gpio_slowdown = 2
     options.brightness=15
