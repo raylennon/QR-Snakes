@@ -26,10 +26,10 @@ if not debug:
     options = RGBMatrixOptions()
     options.rows = 64
     options.cols = 64
-    options.chain_length = 2
+    options.chain_length = 1
     options.parallel = 1
     options.gpio_slowdown = 2
-    options.brightness=15
+    options.brightness=10
     options.hardware_mapping = 'adafruit-hat'
     options.daemon = False
     options.drop_privileges = False
